@@ -9,6 +9,7 @@
 ## 2. Install mercury-client package from Github
     Datayes Official Github is: https://github.com/DataYes/mercury-client
     You can download the mercury-client package here.
+    Or download directly from [here](http://litaotao.github.io/files/mercuryclient.rar)
 
 ### 2.1 Uncompress the package
 ### 2.2 Intall the package
