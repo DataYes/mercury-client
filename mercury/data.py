@@ -21,6 +21,7 @@ DEBUG = False
 AUTHORIZE_URL = "https://gw.wmcloud.com/usermaster/authenticate.json"
 MERCURY_URL = 'https://gw.wmcloud.com/mercury/api/databooks'
 DOWNLOAD_URL = 'https://gw.wmcloud.com/mercury/databooks'
+NOTEBOOK_URL = 'https://gw.wmcloud.com/mercury/api/notebooks'
 
 
 class Client(object):
@@ -57,8 +58,8 @@ class Client(object):
 			print 'Sorry, {}, your username or password are not match, authorization failed ...'
 			reutrn 
 		self.all_data = list_data(self.cookies)
-
-		return self.all_data
+		self.all_notebook = list_notebook(self.cookies)
+		
 
 	def get(self, filename='', download_all=False):
 		'''
@@ -80,6 +81,32 @@ class Client(object):
 			return True
 		elif type(filename) == str:
 			download_file(self.cookies, filename)
+			return True
+		else:
+			pass
+
+		return False
+
+	def notebook(self, filename='', download_all=True):
+		'''
+		Get user's notebook according to filename, can be a string or a list of string. 
+		If set all to True, will download all the notebook file, just for back up.
+		'''
+		if not self.isvalid:
+			print 'Sorry, {}, your username or password are not match, authorization failed ...'
+			reutrn 
+
+		if download_all:
+			self.lists()
+			for i in self.all_notebook:
+				download_notebook(self.cookies, i)
+			return True
+		elif type(filename) == list:
+			for i in filename:
+				download_notebook(self.cookies, i)
+			return True
+		elif type(filename) == str:
+			download_notebook(self.cookies, filename)
 			return True
 		else:
 			pass
@@ -124,6 +151,36 @@ def list_data(cookies):
 		print u'Name: {}'.format(i)
 
 	return all_data
+
+def list_notebook(cookies):
+	url = NOTEBOOK_URL
+	res = requests.get(url, cookies=cookies)
+	if not res.ok:
+		print 'Request error, maybe a server error, please retry or contact us directly'
+		return 0
+	data = res.json()
+	print "Hello, there are {} notebooks in your DataYes Mercury VM".format(str(len(data)))
+	all_notebook = [i['name'] for i in data]
+	for i in all_notebook:
+		print u'Name: {}'.format(i)
+
+	return all_notebook
+	
+def download_notebook(cookies, filename):
+	url = NOTEBOOK_URL
+	notebook_url = url + '/' + filename
+	print u'\nStart download {}'.format(filename),
+
+	with open(filename, 'wb') as f:
+	    response = requests.get(notebook_url, cookies=cookies, stream=True)
+
+	    if not response.ok:
+	        print u'Something is wrong when download file {} '.format(filename)
+	        return 0
+	    
+            for chunk in response.iter_content(1024 * 100):
+		print '...',
+	    	f.write(chunk)
 
 def download_file(cookies, filename):
 	url = DOWNLOAD_URL
