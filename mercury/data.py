@@ -22,6 +22,7 @@ AUTHORIZE_URL = "https://gw.wmcloud.com/usermaster/authenticate.json"
 MERCURY_URL = 'https://gw.wmcloud.com/mercury/api/databooks'
 DOWNLOAD_URL = 'https://gw.wmcloud.com/mercury/databooks'
 NOTEBOOK_URL = 'https://gw.wmcloud.com/mercury/api/notebooks'
+DOWNLOAD_NOTEBOOK_URL = 'https://gw.wmcloud.com/mercury/files'
 
 
 class Client(object):
@@ -39,16 +40,20 @@ class Client(object):
 	- delete(filename)
 		Delete user's data according to filename, can only be a string.
 	"""
-	def __init__(self, username, password):
+	def __init__(self, username, password, token=''):
 		if DEBUG:
 			import pdb; pdb.set_trace()
-		self.username = username
-		self.password = password
-		print 'Welcome, {} ... '.format(username)
-		self.isvalid, self.token = authorize_user(username, password)
-		self.cookies = {'cloud-sso-token': self.token}
-		if not self.isvalid:
-			print 'Sorry, {}, your username or password are not match, authorization failed ...'.format(username)
+		if not token:
+			self.username = username
+			self.password = password
+			print 'Welcome, {} ... '.format(username)
+			self.isvalid, self.token = authorize_user(username, password)
+			self.cookies = {'cloud-sso-token': self.token}
+			if not self.isvalid:
+				print 'Sorry, {}, your username or password are not match, authorization failed ...'.format(username)
+		else:
+			self.isvalid = True
+			self.cookies = {'cloud-sso-token': token}
 
 	def lists(self):
 		'''
@@ -113,6 +118,22 @@ class Client(object):
 
 		return False
 
+	def push(self, filepath):
+		'''
+		Push a file to your DataYes Mercury zone.
+		'''
+		try:
+			files = {'datafile': open(filepath, 'rb')}
+		except:
+			print u"Can not open file at: ".format(filepath)
+			return False
+
+		r = requests.post(MERCURY_URL, files=files, cookies=self.cookies)
+
+		print r.json().get('message', '') if not r.ok else ''
+
+		return r.ok
+		
 	def delete(self, filename):
 		'''
 		Delete user's data according to filename, can only be a string.
@@ -167,7 +188,7 @@ def list_notebook(cookies):
 	return all_notebook
 	
 def download_notebook(cookies, filename):
-	url = NOTEBOOK_URL
+	url = DOWNLOAD_NOTEBOOK_URL
 	notebook_url = url + '/' + filename
 	print u'\nStart download {}'.format(filename),
 
