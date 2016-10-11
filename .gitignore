@@ -1,1 +1,8 @@
+.ipynb_checkpoints/*
+*.ipynb
+*.txt
 *.pyc
+*.csv
+*.xls*
+daily_report
+manual_adjust

@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from data import Client
+from uqer import Client
