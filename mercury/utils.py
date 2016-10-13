@@ -27,11 +27,12 @@ LOCAL_PATH = './'
 
 def authorize_user(user, pwd):
     url = AUTHORIZE_URL
-    if '@' in user:
-        user, tenant = user.split("@") 
-    else:
-        return False, None
-    data = dict(username=user, password=pwd, tenant=tenant)
+    # if '@' in user:
+        # user, tenant = user.split("@") 
+    # else:
+        # return False, None
+    # data = dict(username=user, password=pwd, tenant=tenant)
+    data = dict(username=user, password=pwd)
     res = requests.post(url, data)
     if not res.ok or not res.json().get('content', {}).get('accountId', 0):
         return False, None
