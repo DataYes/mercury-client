@@ -121,3 +121,21 @@ def download_file(cookies, filename):
 def upload_data(files, cookies):
     r = requests.post(MERCURY_URL, files=files, cookies=cookies)
     print r.text
+
+def order_delay(account_id, date, orders, cookies):
+    try:
+        sent_dict = {}
+        sent_dict["AccountId"] = account_id
+        sent_dict["Date"] = date
+        sent_dict["Orders"] = orders
+        for order in sent_dict["Orders"]:
+            if order.has_key('Price'):
+                order["Algorithm"] = 'LIMIT'
+            else:
+                order["Algorithm"] = 'MARKET'
+            order["StartTime"] = None
+            order["EndTime"] = None
+        resp = requests.post("https://gw.wmcloud.com/pms_mom/api2/order/placeDelay", cookies=cookies, json=sent_dict)
+        print resp.text
+    except Exception, e:
+        raise e

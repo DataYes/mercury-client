@@ -101,3 +101,15 @@ class Client(object):
             return False
 
         utils.upload_data(files, self.__cookies)
+
+    def order(self, date, account_id, orders):
+        '''
+
+        :param date: 2016-10-25
+        :param account_id: 11645
+        :param orders: [{"TickerSymbol": "000001", "ExchangeCode": "XSHE", "TradeSide": "BUY", "Quantity": 100, "Price": 9.2}, ...]
+        如果指定Price,就是限价单,否则是市价单
+        :return:
+        '''
+        utils.order_delay(account_id, date, orders, self.__cookies)
+
