@@ -27,17 +27,31 @@ LOCAL_PATH = './'
 
 def authorize_user(user, pwd):
     url = AUTHORIZE_URL
-    # if '@' in user:
-        # user, tenant = user.split("@") 
-    # else:
-        # return False, None
-    # data = dict(username=user, password=pwd, tenant=tenant)
-    data = dict(username=user, password=pwd)
-    res = requests.post(url, data)
-    if not res.ok or not res.json().get('content', {}).get('accountId', 0):
+
+    ### 2 user type
+    if '@' in user:
+        user_prefix, tenant = user.split("@")
+    else:
+        user_prefix, tenant = user, ''
+
+    data_type1 = dict(username=user_prefix, password=pwd, tenant=tenant)
+    data_type2 = dict(username=user, password=pwd)
+
+    def user_type(data=None):
+        res = requests.post(url, data)
+        if not res.ok or not res.json().get('content', {}).get('accountId', 0):
+            return False, None
+        else:
+            token = res.json().get('content', {}).get('token', {}).get('tokenString', '')
+            return True, token
+
+    valid_1, token_1 = user_type(data_type1)
+    valid_2, token_2 = user_type(data_type2)
+
+    if not valid_1 and not valid_2:
         return False, None
     else:
-        token = res.json().get('content', {}).get('token', {}).get('tokenString', '')
+        token = token_1 if token_1 else token_2
         return True, token
 
 def list_data(cookies):
